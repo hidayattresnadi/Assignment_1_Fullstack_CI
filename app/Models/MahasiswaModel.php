@@ -7,19 +7,34 @@ use App\Entities\Mahasiswa;
 class MahasiswaModel
 {
     private array $studentsData = [];
+    private string $filePath;
 
     public function __construct()
     {
-        $this->studentsData = [
-            new \App\Entities\Mahasiswa('John Doe', 'Teknik Informatika', '12345'),
-            new \App\Entities\Mahasiswa('Jane Doe', 'Sistem Informasi', '67890')
-        ];
+        $this->filePath = WRITEPATH . 'students.json';
+
+        // Jika file tidak ada, buat file baru
+        if (!file_exists($this->filePath)) {
+            file_put_contents($this->filePath, json_encode([], JSON_PRETTY_PRINT));
+        }
+
+        // Load data dari JSON dan konversi kembali ke objek Mahasiswa
+        $this->studentsData = array_map(
+            fn($data) => Mahasiswa::fromArray($data),
+            json_decode(file_get_contents($this->filePath), true) ?? []
+        );
+    }
+
+    private function saveData()
+    {
+        file_put_contents($this->filePath, json_encode(array_map(fn($s) => $s->toArray(), $this->studentsData), JSON_PRETTY_PRINT));
     }
 
     public function addStudent($nim, $nama, $jurusan): string
     {
         $newStudent = new \App\Entities\Mahasiswa($nama, $jurusan, $nim);
         $this->studentsData[] = $newStudent;
+        $this->saveData();
         return "Add Student Success";
     }
 
@@ -30,6 +45,7 @@ class MahasiswaModel
                 $student->setNim($updatednim);
                 $student->setJurusan($jurusan);
                 $student->setNama($nama);
+                $this->saveData();
                 return "Update Student Success";
             }
         }
@@ -42,6 +58,7 @@ class MahasiswaModel
             if ($student->getNim() === $nim) {
                 unset($this->studentsData[$index]);
                 $this->studentsData = array_values($this->studentsData);
+                $this->saveData();
                 return true;
             }
         }

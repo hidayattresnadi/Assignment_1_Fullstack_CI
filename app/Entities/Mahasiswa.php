@@ -2,9 +2,7 @@
 
 namespace App\Entities;
 
-use CodeIgniter\Entity\Entity;
-
-class Mahasiswa extends Entity
+class Mahasiswa
 {
     private $nama;
     private $nim;
@@ -15,6 +13,20 @@ class Mahasiswa extends Entity
         $this->nama = $nama;
         $this->jurusan = $jurusan;
         $this->nim = $nim;
+    }
+
+    public function toArray(): array
+    {
+        return [
+            'nim' => $this->nim,
+            'nama' => $this->nama,
+            'jurusan' => $this->jurusan
+        ];
+    }
+
+    public static function fromArray(array $data): self
+    {
+        return new self($data['nama'], $data['jurusan'], $data['nim']);
     }
 
     public function getNama(): string

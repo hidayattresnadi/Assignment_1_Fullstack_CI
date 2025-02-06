@@ -21,7 +21,7 @@ class MahasiswaController extends BaseController
         return view('students_list', $data);
     }
 
-    public function detail($nim): string
+    public function detail($nim)
     {
         $data['student'] = $this->mahasiswaModel->getStudentByNIM($nim);
         return view('student_detail', $data);
